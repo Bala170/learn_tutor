@@ -1,0 +1,22 @@
+{% extends 'mainapp/base.html' %}
+{% block title %}Sign Up{% endblock %}
+{% block page_heading %}Create Account{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-2xl">
+    <div class="modern-card p-8 sm:p-10">
+        <h2 class="font-display text-3xl font-bold text-slate-900">Join Learnify</h2>
+        <p class="mt-2 text-sm text-slate-600">Sign up as a teacher or student and start your AI-powered learning journey.</p>
+        <form method="post" autocomplete="off" class="mt-8 grid gap-2 sm:grid-cols-2">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="sm:col-span-2">
+                <button type="submit" class="btn-primary-modern mt-3 w-full"><i class="fa-solid fa-user-plus"></i>Register</button>
+            </div>
+        </form>
+        <p class="mt-5 text-center text-sm text-slate-600">
+            Already have an account?
+            <a class="font-semibold text-indigo-600 hover:text-indigo-700" href="{% url 'login' %}">Login</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

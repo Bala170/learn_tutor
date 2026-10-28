@@ -1,0 +1,151 @@
+{% extends 'mainapp/base.html' %}
+{% block title %}Student Dashboard{% endblock %}
+{% block page_heading %}Student Dashboard{% endblock %}
+{% block content %}
+<section class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="font-display text-3xl font-bold text-slate-900">Available Subjects</h2>
+            <p class="mt-1 text-sm text-slate-600">Explore notes and ask AI questions based on your class materials.</p>
+        </div>
+    </div>
+
+    {% if subjects %}
+        <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {% for subject in subjects %}
+                <article class="modern-card lift-card p-6">
+                    <div class="flex items-start justify-between gap-3">
+                        <h3 class="font-display text-xl font-bold text-slate-900">{{ subject.name }}</h3>
+                        <span class="rounded-xl bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">{{ subject.department }}</span>
+                    </div>
+                    <p class="mt-3 text-sm leading-relaxed text-slate-600">
+                        {{ subject.description|default:'No description available yet for this subject.' }}
+                    </p>
+                    <div class="mt-4 flex flex-wrap items-center gap-2">
+                        <span class="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">Year {{ subject.year }}</span>
+                        <span class="rounded-lg bg-cyan-50 px-2.5 py-1 text-xs font-medium text-cyan-700">{{ subject.notes.count }} note{{ subject.notes.count|pluralize }}</span>
+                    </div>
+
+                    <div class="mt-5 space-y-2">
+                        {% for note in subject.notes.all %}
+                            <div class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                                <a href="{{ note.file.url }}" target="_blank" class="text-sm font-medium text-indigo-600 hover:text-indigo-700">{{ note.file.name|slice:'6:' }}</a>
+                                <button class="btn-secondary-modern ai-tutor-btn" data-note-id="{{ note.id }}">Quick AI</button>
+                            </div>
+                        {% empty %}
+                            <p class="rounded-xl bg-slate-100 px-3 py-2 text-xs text-slate-600">No notes uploaded for this subject yet.</p>
+                        {% endfor %}
+                    </div>
+
+                    <a href="{% url 'tutor_view' subject.id %}" class="btn-primary-modern mt-6 w-full justify-center">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>Open AI Tutor
+                    </a>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p class="text-xl font-semibold text-indigo-900">No subjects available</p>
+            <p class="mt-2 text-sm text-indigo-700">No subjects match your department and year yet. Ask your teacher to publish one.</p>
+        </div>
+    {% endif %}
+</section>
+
+{% include 'mainapp/chat_modal.html' %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let currentNoteId = null;
+let chatHistory = [];
+
+const quickChatModal = document.getElementById("quickChatModal");
+const quickChatBackdrop = document.getElementById("quickChatBackdrop");
+const quickChatClose = document.getElementById("quickChatClose");
+const chatHistoryContainer = document.getElementById("chat-history");
+const chatForm = document.getElementById("chat-form");
+const chatInput = document.getElementById("chat-input");
+
+function openQuickChat(noteId) {
+    currentNoteId = noteId;
+    chatHistory = [];
+    chatHistoryContainer.innerHTML = "";
+    quickChatModal.classList.remove("hidden");
+    quickChatBackdrop.classList.remove("hidden");
+}
+
+function closeQuickChat() {
+    quickChatModal.classList.add("hidden");
+    quickChatBackdrop.classList.add("hidden");
+}
+
+document.querySelectorAll(".ai-tutor-btn").forEach((btn) => {
+    btn.addEventListener("click", () => openQuickChat(btn.getAttribute("data-note-id")));
+});
+
+if (quickChatClose) {
+    quickChatClose.addEventListener("click", closeQuickChat);
+}
+if (quickChatBackdrop) {
+    quickChatBackdrop.addEventListener("click", closeQuickChat);
+}
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+        closeQuickChat();
+    }
+});
+
+function appendMessage(role, text) {
+    const msg = document.createElement("div");
+    msg.className = role === "user" ? "flex justify-end" : "flex justify-start";
+    msg.innerHTML = `
+        <div class="max-w-[78%] rounded-2xl px-3 py-2 text-sm ${role === "user" ? "bg-indigo-600 text-white" : "border border-slate-200 bg-white text-slate-700"}">
+            ${text}
+        </div>
+    `;
+    chatHistoryContainer.appendChild(msg);
+    chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+}
+
+if (chatForm) {
+    chatForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const userMsg = chatInput.value.trim();
+        if (!userMsg || !currentNoteId) {
+            return;
+        }
+
+        chatInput.value = "";
+        appendMessage("user", userMsg);
+        chatHistory.push({ user: userMsg });
+
+        const loader = document.createElement("div");
+        loader.className = "flex justify-start";
+        loader.innerHTML = '<div class="typing-indicator rounded-2xl border border-slate-200 bg-white px-3 py-2"><span></span><span></span><span></span></div>';
+        chatHistoryContainer.appendChild(loader);
+        chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+
+        try {
+            const resp = await fetch(`/api/chat/${currentNoteId}/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query: userMsg, history: chatHistory })
+            });
+            const data = await resp.json();
+            loader.remove();
+
+            if (data.answer) {
+                appendMessage("ai", data.answer);
+                chatHistory[chatHistory.length - 1]["ai"] = data.answer;
+            } else {
+                appendMessage("ai", `Error: ${data.error || "No answer"}`);
+            }
+        } catch (_error) {
+            loader.remove();
+            appendMessage("ai", "Could not connect to AI Tutor.");
+        }
+    });
+}
+</script>
+{% endblock %}

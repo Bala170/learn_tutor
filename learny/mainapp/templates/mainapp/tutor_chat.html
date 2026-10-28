@@ -1,0 +1,129 @@
+{% extends 'mainapp/base.html' %}
+{% load static %}
+{% block title %}AI Tutor{% endblock %}
+{% block page_heading %}AI Tutor - {{ subject.name }}{% endblock %}
+{% block content %}
+<section class="grid h-[calc(100vh-13.5rem)] gap-5 lg:grid-cols-[280px,1fr]">
+    <aside class="modern-card hidden h-full p-5 lg:block">
+        <h2 class="font-display text-xl font-bold text-slate-900">Tutor Session</h2>
+        <p class="mt-2 text-sm text-slate-600">Subject-focused answers from uploaded notes only.</p>
+
+        <div class="mt-6 rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4">
+            <p class="text-xs uppercase tracking-wide text-indigo-600">Current Subject</p>
+            <p class="mt-1 text-lg font-semibold text-indigo-900">{{ subject.name }}</p>
+        </div>
+
+        <div class="mt-5 space-y-3 text-xs text-slate-600">
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <p class="font-semibold text-slate-700">Tips</p>
+                <ul class="mt-2 space-y-1">
+                    <li>Ask clear questions for better answers.</li>
+                    <li>Request summary, bullets, or fill-in responses.</li>
+                    <li>The assistant only uses uploaded note context.</li>
+                </ul>
+            </div>
+            <a href="{% url 'student_dashboard' %}" class="btn-ghost-modern w-full justify-center">
+                <i class="fa-solid fa-arrow-left"></i>Back to Dashboard
+            </a>
+        </div>
+    </aside>
+
+    <div class="modern-card flex h-full flex-col overflow-hidden">
+        <div class="border-b border-slate-200 bg-white/90 px-5 py-4">
+            <h3 class="font-display text-xl font-bold text-slate-900">Chat with AI Tutor</h3>
+            <p class="text-sm text-slate-600">Answers are generated from your subject notes.</p>
+        </div>
+
+        <div id="chat-box" class="flex-1 space-y-4 overflow-y-auto bg-slate-50 px-4 py-5 sm:px-6"></div>
+
+        <form id="chat-form" class="sticky bottom-0 border-t border-slate-200 bg-white/95 p-4 sm:p-5">
+            <div class="flex items-center gap-2 rounded-2xl border border-slate-300 bg-white p-2 shadow-sm focus-within:border-indigo-400 focus-within:ring-4 focus-within:ring-indigo-100">
+                <input type="text" id="chat-input" class="w-full border-0 bg-transparent px-2 py-2 text-sm text-slate-800 outline-none" placeholder="Ask your question about {{ subject.name }}..." autocomplete="off" required>
+                <button id="send-btn" type="submit" class="btn-primary-modern">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span class="hidden sm:inline">Send</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+const chatBox = document.getElementById('chat-box');
+const chatForm = document.getElementById('chat-form');
+const chatInput = document.getElementById('chat-input');
+const sendBtn = document.getElementById('send-btn');
+let history = [];
+
+function appendMessage(sender, text) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = sender === 'user' ? 'flex justify-end' : 'flex justify-start';
+    msgDiv.innerHTML = `
+        <div class="max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${sender === 'user' ? 'bg-indigo-600 text-white shadow-md' : 'border border-slate-200 bg-white text-slate-700'}">
+            ${text}
+        </div>
+    `;
+    chatBox.appendChild(msgDiv);
+    smoothScrollToBottom();
+}
+
+function smoothScrollToBottom() {
+    chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
+}
+
+function typingIndicator() {
+    const wrap = document.createElement('div');
+    wrap.className = 'flex justify-start';
+    wrap.innerHTML = '<div class="typing-indicator rounded-2xl border border-slate-200 bg-white px-4 py-3"><span></span><span></span><span></span></div>';
+    return wrap;
+}
+
+function setLoading(isLoading) {
+    if (isLoading) {
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<span class="spin"></span><span class="hidden sm:inline">Sending</span>';
+        return;
+    }
+    sendBtn.disabled = false;
+    sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i><span class="hidden sm:inline">Send</span>';
+}
+
+chatForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const question = chatInput.value.trim();
+    if (!question) return;
+
+    appendMessage('user', question);
+    chatInput.value = '';
+    const indicator = typingIndicator();
+    chatBox.appendChild(indicator);
+    smoothScrollToBottom();
+    setLoading(true);
+
+    fetch(window.location.pathname.replace(/\/$/, '') + '/api/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: question, history: history })
+    })
+    .then(r => r.json())
+    .then(data => {
+        indicator.remove();
+        setLoading(false);
+        if (data.answer) {
+            appendMessage('ai', data.answer);
+            history.push({ role: 'user', content: question });
+            history.push({ role: 'ai', content: data.answer });
+        } else {
+            appendMessage('ai', `Sorry, no answer. ${data.error || ''}`);
+        }
+    })
+    .catch(() => {
+        indicator.remove();
+        setLoading(false);
+        appendMessage('ai', 'Error contacting AI Tutor.');
+    });
+});
+
+appendMessage('ai', 'Hi! Ask me anything about {{ subject.name|escapejs }} and I will answer from the uploaded notes.');
+</script>
+{% endblock %}

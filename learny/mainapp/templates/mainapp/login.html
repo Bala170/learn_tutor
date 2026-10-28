@@ -1,0 +1,20 @@
+{% extends 'mainapp/base.html' %}
+{% block title %}Login{% endblock %}
+{% block page_heading %}Welcome Back{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-xl">
+    <div class="modern-card p-8 sm:p-10">
+        <h2 class="font-display text-3xl font-bold text-slate-900">Log in to your workspace</h2>
+        <p class="mt-2 text-sm text-slate-600">Continue managing classes, notes, and AI learning sessions.</p>
+        <form method="post" autocomplete="off" class="mt-8">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn-primary-modern mt-3 w-full"><i class="fa-solid fa-arrow-right-to-bracket"></i>Login</button>
+        </form>
+        <p class="mt-5 text-center text-sm text-slate-600">
+            Do not have an account?
+            <a class="font-semibold text-indigo-600 hover:text-indigo-700" href="{% url 'register' %}">Create one</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

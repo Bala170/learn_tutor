@@ -1,0 +1,178 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Educational Platform{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Poppins", "ui-sans-serif", "system-ui"],
+                        display: ["Space Grotesk", "ui-sans-serif", "system-ui"]
+                    },
+                    colors: {
+                        brand: {
+                            50: "#eef2ff",
+                            100: "#e0e7ff",
+                            500: "#6366f1",
+                            600: "#4f46e5",
+                            700: "#4338ca"
+                        }
+                    },
+                    boxShadow: {
+                        soft: "0 10px 30px -12px rgba(15, 23, 42, 0.12)",
+                        lift: "0 24px 48px -24px rgba(79, 70, 229, 0.4)"
+                    }
+                }
+            }
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWix+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkR4j8NBQ7n7fJmQ0W+XQ9Q4qR9f6Lr9F2ow==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="{% static 'custom.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-800">
+    <div class="app-bg" aria-hidden="true"></div>
+    <div class="relative min-h-screen">
+        <div class="flex min-h-screen">
+            <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full border-r border-white/70 bg-white/80 p-6 shadow-soft backdrop-blur transition-transform duration-300 lg:translate-x-0">
+                <a href="{% url 'home' %}" class="mb-8 flex items-center gap-3">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-400 text-white shadow-soft">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </span>
+                    <span class="font-display text-2xl font-bold text-slate-900">Learnify</span>
+                </a>
+                <nav class="space-y-2 text-sm">
+                    {% if user.is_authenticated %}
+                        {% if user.role == 'teacher' %}
+                            <a href="{% url 'teacher_dashboard' %}" class="nav-link"><i class="fa-solid fa-gauge"></i>Dashboard</a>
+                            <a href="{% url 'add_subject' %}" class="nav-link"><i class="fa-solid fa-book-open"></i>Subjects</a>
+                            <a href="{% url 'upload_notes' %}" class="nav-link"><i class="fa-solid fa-note-sticky"></i>Notes</a>
+                        {% elif user.role == 'student' %}
+                            <a href="{% url 'student_dashboard' %}" class="nav-link"><i class="fa-solid fa-gauge"></i>Dashboard</a>
+                            <a href="{% url 'student_dashboard' %}" class="nav-link"><i class="fa-solid fa-book-open"></i>Subjects</a>
+                            <a href="{% url 'student_dashboard' %}" class="nav-link"><i class="fa-solid fa-note-sticky"></i>Notes</a>
+                        {% endif %}
+                        <a href="{% url 'user_logout' %}" class="nav-link"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
+                    {% else %}
+                        <a href="{% url 'home' %}" class="nav-link"><i class="fa-solid fa-house"></i>Home</a>
+                        <a href="{% url 'login' %}" class="nav-link"><i class="fa-solid fa-arrow-right-to-bracket"></i>Login</a>
+                        <a href="{% url 'register' %}" class="nav-link"><i class="fa-solid fa-user-plus"></i>Sign Up</a>
+                    {% endif %}
+                </nav>
+                <div class="mt-8 rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4 text-xs text-indigo-900">
+                    <p class="font-semibold">Smart Learning, Beautifully Designed</p>
+                    <p class="mt-1 text-indigo-700">A modern teaching and AI tutoring workspace.</p>
+                </div>
+            </aside>
+
+            <div id="sidebarOverlay" class="fixed inset-0 z-30 hidden bg-slate-900/40 lg:hidden"></div>
+
+            <div class="flex min-h-screen w-full flex-col lg:pl-72">
+                <header class="sticky top-0 z-20 border-b border-slate-200/70 bg-white/85 backdrop-blur">
+                    <div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+                        <div class="flex items-center gap-3">
+                            <button id="sidebarToggle" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition hover:border-indigo-300 hover:text-indigo-600 lg:hidden" aria-label="Open menu">
+                                <i class="fa-solid fa-bars"></i>
+                            </button>
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-500">Educational Platform</p>
+                                <h1 class="font-display text-xl font-bold text-slate-900">{% block page_heading %}Premium Learning Workspace{% endblock %}</h1>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                            <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-400"></div>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-800">{% if user.is_authenticated %}{{ user.username }}{% else %}Guest{% endif %}</p>
+                                <p class="text-xs uppercase tracking-wide text-slate-500">{% if user.is_authenticated %}{{ user.role }}{% else %}Visitor{% endif %}</p>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+                    {% block content %}{% endblock %}
+                </main>
+
+                <footer class="mx-auto w-full max-w-7xl px-4 pb-8 text-xs text-slate-500 sm:px-6 lg:px-8">
+                    <div class="rounded-2xl border border-slate-200 bg-white/85 p-4 backdrop-blur">
+                        &copy; {{ now|date:'Y' }} Learnify. Crafted for modern classrooms.
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="fixed right-4 top-4 z-50 space-y-3">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="toast-item {% if message.tags == 'error' %}toast-error{% elif message.tags == 'warning' %}toast-warning{% elif message.tags == 'success' %}toast-success{% else %}toast-info{% endif %}">
+                    <p class="text-sm font-medium">{{ message }}</p>
+                    <button type="button" class="toast-close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <script>
+        const sidebar = document.getElementById("sidebar");
+        const sidebarOverlay = document.getElementById("sidebarOverlay");
+        const sidebarToggle = document.getElementById("sidebarToggle");
+
+        function openSidebar() {
+            sidebar.classList.remove("-translate-x-full");
+            sidebarOverlay.classList.remove("hidden");
+        }
+
+        function closeSidebar() {
+            sidebar.classList.add("-translate-x-full");
+            sidebarOverlay.classList.add("hidden");
+        }
+
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener("click", openSidebar);
+        }
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener("click", closeSidebar);
+        }
+
+        document.querySelectorAll(".nav-link").forEach((link) => {
+            if (link.getAttribute("href") === window.location.pathname) {
+                link.style.background = "linear-gradient(90deg, rgba(79, 70, 229, 0.12), rgba(34, 211, 238, 0.15))";
+                link.style.color = "#4f46e5";
+                link.style.transform = "translateX(4px)";
+            }
+        });
+
+        document.querySelectorAll(".toast-item").forEach((toast) => {
+            const closeBtn = toast.querySelector(".toast-close");
+            if (closeBtn) {
+                closeBtn.addEventListener("click", () => toast.remove());
+            }
+            setTimeout(() => {
+                toast.classList.add("toast-hide");
+                setTimeout(() => toast.remove(), 350);
+            }, 4200);
+        });
+
+        // Improve default Django form look in templates using form.as_p
+        document.querySelectorAll("input, select, textarea").forEach((el) => {
+            if (el.type === "hidden") {
+                return;
+            }
+            el.classList.add("form-control-modern");
+        });
+
+        document.querySelectorAll("label").forEach((label) => {
+            label.classList.add("form-label-modern");
+        });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

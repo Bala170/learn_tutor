@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Learnify favicon">
+  <defs>
+    <linearGradient id="grad" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="url(#grad)"/>
+  <path d="M17 22.5c0-1.4 1.1-2.5 2.5-2.5H42v24H19.5a2.5 2.5 0 0 1-2.5-2.5v-19z" fill="#fff" opacity="0.95"/>
+  <path d="M42 20h2.5c1.4 0 2.5 1.1 2.5 2.5v19a2.5 2.5 0 0 1-2.5 2.5H42V20z" fill="#e0e7ff"/>
+  <path d="M23 27h14M23 32h14M23 37h11" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round"/>
+</svg>

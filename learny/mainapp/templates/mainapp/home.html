@@ -1,0 +1,44 @@
+{% extends 'mainapp/base.html' %}
+{% block title %}Home{% endblock %}
+{% block page_heading %}Welcome to Learnify{% endblock %}
+{% block content %}
+<section class="grid gap-6 lg:grid-cols-2">
+    <div class="modern-card lift-card p-8 sm:p-10">
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-indigo-500">Education + AI</p>
+        <h2 class="font-display mt-4 text-4xl font-bold leading-tight text-slate-900 sm:text-5xl">
+            Build a premium classroom experience.
+        </h2>
+        <p class="mt-5 text-base leading-relaxed text-slate-600">
+            Manage subjects, upload notes, and offer students an AI tutor interface that feels production-ready.
+            Designed for impressive demos and smooth daily use.
+        </p>
+        {% if not user.is_authenticated %}
+            <div class="mt-8 flex flex-wrap gap-3">
+                <a class="btn-primary-modern" href="{% url 'login' %}"><i class="fa-solid fa-arrow-right-to-bracket"></i>Login</a>
+                <a class="btn-secondary-modern" href="{% url 'register' %}"><i class="fa-solid fa-user-plus"></i>Create Account</a>
+            </div>
+        {% endif %}
+    </div>
+    <div class="modern-card p-8 sm:p-10">
+        <h3 class="font-display text-2xl font-bold text-slate-900">What makes this feel SaaS-grade?</h3>
+        <div class="mt-6 grid gap-4 sm:grid-cols-2">
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-lg font-semibold text-slate-900">Elegant Dashboards</p>
+                <p class="mt-1 text-sm text-slate-600">Clear cards, stat summaries, and polished subject management workflows.</p>
+            </article>
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-lg font-semibold text-slate-900">AI Tutor Chat</p>
+                <p class="mt-1 text-sm text-slate-600">ChatGPT-inspired messaging UI with smooth loading and typing feedback.</p>
+            </article>
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-lg font-semibold text-slate-900">Role-Based UX</p>
+                <p class="mt-1 text-sm text-slate-600">Tailored navigation and interactions for teachers and students.</p>
+            </article>
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-lg font-semibold text-slate-900">Responsive Design</p>
+                <p class="mt-1 text-sm text-slate-600">Works seamlessly from mobile to desktop with collapsible navigation.</p>
+            </article>
+        </div>
+    </div>
+</section>
+{% endblock %}

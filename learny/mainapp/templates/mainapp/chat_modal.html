@@ -1,0 +1,23 @@
+<div id="quickChatBackdrop" class="fixed inset-0 z-40 hidden bg-slate-900/50"></div>
+<div id="quickChatModal" class="fixed inset-0 z-50 hidden overflow-y-auto p-4 sm:p-8">
+  <div class="mx-auto mt-10 max-w-2xl modern-card p-5 sm:p-6">
+    <div class="mb-4 flex items-center justify-between gap-3 border-b border-slate-200 pb-4">
+      <div>
+        <h3 class="font-display text-xl font-bold text-slate-900">Quick AI Tutor</h3>
+        <p class="text-xs text-slate-500">Ask about a single note file</p>
+      </div>
+      <button id="quickChatClose" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:text-slate-700" aria-label="Close quick chat">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div id="chat-history" class="mb-4 max-h-[360px] space-y-3 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-3"></div>
+
+    <form id="chat-form" autocomplete="off" class="flex items-center gap-2">
+      <input type="text" id="chat-input" class="form-control-modern" placeholder="Ask a question about this note..." required>
+      <button class="btn-primary-modern" type="submit">
+        <i class="fa-solid fa-paper-plane"></i>Send
+      </button>
+    </form>
+  </div>
+</div>
